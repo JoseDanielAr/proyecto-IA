@@ -14,6 +14,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESULT_FOLDER'] = RESULT_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
+MODEL_PATH = "model.pt"
+
+# Debugging: Check if model.pt exists
+if not os.path.exists(MODEL_PATH):
+    print("ERROR: model.pt not found!")
+
 # Load model
 model = YOLO('model.pt')
 
