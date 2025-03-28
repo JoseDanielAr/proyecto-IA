@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente IA de Recetas</title>
+    <style>
+        /* Previous styles remain the same */
+        
+        .food-list {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .food-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .food-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .food-list button {
+            padding: 3px 8px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .add-food {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .add-food select {
+            padding: 5px;
+            flex-grow: 1;
+        }
+        .add-food button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .clear-btn {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .confirm-btn {
+        padding: 10px 20px;
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        font-size: 16px;
+        margin-top: 15px;
+        cursor: pointer;
+    }
+    .confirm-btn:hover {
+        background-color: #27ae60;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>¡A cocinar! Muestranos tus ingredientes y te diremos qué puedes hacer.</h1>
+        
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required>
+            <button type="submit">Predecir</button>
+        </form>
+        
+        <!-- Display images if they exist -->
+        {% if original_image and result_image %}
+        <div class="image-container">
+            <div class="image-box">
+                <h3>Original</h3>
+                <img src="{{ original_image }}" alt="Uploaded Image">
+            </div>
+            <div class="image-box">
+                <h3>Resultado</h3>
+                <img src="{{ result_image }}" alt="Detection Result">
+            </div>
+        </div>
+        {% endif %}
+        <!-- Detected Foods List with Edit Functionality -->
+        <div class="food-list">
+            <h3>Lista de Alimentos</h3>
+            {% if detected_foods %}
+            <ul>
+                {% for food in detected_foods %}
+                <li>
+                    {{ food }}
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="remove_item" value="{{ food }}">
+                        <button type="submit">Eliminar</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No se han detectado alimentos aún.</p>
+            {% endif %}
+            
+            <div class="add-food">
+                <form method="post">
+                    <select name="food_select" required>
+                        <option value="" disabled selected>Seleccione un alimento</option>
+                        {% for food in available_foods %}
+                            {% if food not in detected_foods %}
+                            <option value="{{ food }}">{{ food }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button type="submit" name="add_item">Añadir</button>
+                </form>
+            </div>
+            
+            <form method="post">
+                <input type="hidden" name="confirm_list" value="true">
+                <button type="submit" class="confirm-btn">Confirmar lista y ver recetas</button>
+            </form>
+
+            <form action="{{ url_for('clear_list') }}" method="post">
+                <button type="submit" class="clear-btn">Limpiar lista</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

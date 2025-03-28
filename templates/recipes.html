@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetas Recomendadas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .ingredients-list {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .recipe-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+        }
+        .recipe-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+        .confirm-btn {
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .recipe-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .recipe-description {
+            font-style: italic;
+            color: #555;
+        }
+
+        .recipe-meta {
+            margin-top: 15px;
+        }
+
+        .recipe-meta h4 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .recipe-steps {
+            padding-left: 20px;
+        }
+
+        .no-recipes {
+            background: #fff3f3;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ff6b6b;
+        }
+        .partial-match {
+            border-left: 4px solid #FFA500; /* Orange warning stripe */
+            opacity: 0.9;
+        }
+
+        .partial-warning {
+            color: #d35400;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .perfect-match {
+            border-left: 4px solid #2ecc71; /* Green success stripe */
+        }
+        .partial-info {
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .partial-have {
+            color: #28a745; /* Green */
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .partial-warning {
+            color: #dc3545; /* Red */
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Recetas Recomendadas</h1>
+
+    <div class="ingredients-list">
+        <h2>Tus ingredientes:</h2>
+        <ul>
+            {% for item in ingredients %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- PERFECT MATCHES SECTION -->
+    <div class="recipes-container">
+        <h2>Recetas completas ({{ perfect_matches|length }}):</h2>
+        
+        {% if perfect_matches %}
+            {% for recipe in perfect_matches %}
+            <div class="recipe-card perfect-match" id="recipe-perfect-{{ loop.index }}">
+                <div class="recipe-actions">
+                    <button onclick="speakRecipe('recipe-perfect-{{ loop.index }}')" class="tts-btn">
+                        🔊 Leer receta
+                    </button>
+                    <button onclick="stopSpeech()" class="stop-tts-btn">
+                        ⏹️ Detener
+                    </button>
+                </div>
+                
+                <h3>{{ recipe.name }}</h3>
+                <p class="recipe-description">{{ recipe.description }}</p>
+                
+                <div class="recipe-meta">
+                    <h4>Ingredientes necesarios:</h4>
+                    <ul>
+                        {% for ingredient in recipe.ingredients %}
+                        <li>{{ ingredient }}</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <h4>Instrucciones:</h4>
+                    <ol class="recipe-steps">
+                        {% for step in recipe.steps %}
+                        <li>{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-recipes">No tienes recetas completas aún.</p>
+        {% endif %}
+    </div>
+
+    <!-- PARTIAL MATCHES SECTION -->
+    <div class="recipes-container">
+        <h2>Recetas casi listas ({{ partial_matches|length }}):</h2>
+        
+        {% if partial_matches %}
+            {% for recipe in partial_matches %}
+            <div class="recipe-card partial-match" id="recipe-partial-{{ loop.index }}">
+                <div class="recipe-actions">
+                    <button onclick="speakRecipe('recipe-partial-{{ loop.index }}')" class="tts-btn">
+                        🔊 Leer receta
+                    </button>
+                    <button onclick="stopSpeech()" class="stop-tts-btn">
+                        ⏹️ Detener
+                    </button>
+                </div>
+                
+                <!-- ADD THIS NEW SECTION -->
+                <div class="partial-info">
+                    <div class="partial-have">
+                        ✅ Tienes: {{ recipe.matching_ings|join(", ") }}
+                    </div>
+                    <div class="partial-warning">
+                        ⚠️ Te falta: {{ recipe.missing_ings|join(", ") }}
+                    </div>
+                </div>
+                <!-- END OF NEW SECTION -->
+                
+                <h3>{{ recipe.name }}</h3>
+                <p class="recipe-description">{{ recipe.description }}</p>
+                
+                <div class="recipe-meta">
+                    <h4>Ingredientes necesarios:</h4>
+                    <ul>
+                        {% for ingredient in recipe.ingredients %}
+                        <li>{{ ingredient }}</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <h4>Instrucciones:</h4>
+                    <ol class="recipe-steps">
+                        {% for step in recipe.steps %}
+                        <li>{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-recipes">No tienes recetas parciales.</p>
+        {% endif %}
+    </div>
+
+    <a href="{{ url_for('upload_file') }}" class="back-btn">Volver a editar lista</a>
+
+    <!-- Text-to-Speech Script -->
+    <script>
+    function speakRecipe(recipeId) {
+        const recipeCard = document.getElementById(recipeId);
+        const recipeName = recipeCard.querySelector('h3').innerText;
+        const description = recipeCard.querySelector('.recipe-description').innerText;
+        
+        // Get ingredients list
+        const ingredients = Array.from(recipeCard.querySelectorAll('.recipe-meta ul li'))
+                            .map(li => li.innerText).join(', ');
+        
+        // Get steps with numbering
+        const steps = Array.from(recipeCard.querySelectorAll('.recipe-steps li'))
+                     .map((li, index) => `${index + 1}. ${li.innerText}`).join('. ');
+        
+        // Check for missing ingredients warning
+        const warningElement = recipeCard.querySelector('.partial-warning');
+        const warningText = warningElement ? warningElement.innerText + '. ' : '';
+        
+        const speechText = `
+            ${recipeName}. 
+            ${description}. 
+            ${warningText}
+            Ingredientes necesarios: ${ingredients}. 
+            Instrucciones: ${steps}
+        `;
+
+        const speech = new SpeechSynthesisUtterance();
+        speech.text = speechText;
+        speech.lang = 'es-ES';
+        speech.rate = 0.9;
+        
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(speech);
+    }
+
+    function stopSpeech() {
+        window.speechSynthesis.cancel();
+    }
+    </script>
+
+    <style>
+    /* TTS Button Styles */
+    .recipe-actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .tts-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+    
+    .stop-tts-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+    
+    .tts-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .stop-tts-btn:hover {
+        background-color: #c0392b;
+    }
+    </style>
+</body>
