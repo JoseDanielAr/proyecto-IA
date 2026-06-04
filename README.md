@@ -45,3 +45,10 @@ werkzeug
 ```
 
 El modelo entrenado (`model.pt`) debe colocarse en la raíz del proyecto. No está incluido en el repositorio.
+
+## Capturas de pantalla
+
+<img width="661" height="1019" alt="Screenshot 2026-06-04 113032" src="https://github.com/user-attachments/assets/81499e23-5c8b-473d-98c8-9a6c42c6e1ed" />
+
+<img width="845" height="1270" alt="Screenshot 2026-06-04 122711" src="https://github.com/user-attachments/assets/5a5e54d5-ce4f-47a8-b250-d0d6b019b960" />
+
